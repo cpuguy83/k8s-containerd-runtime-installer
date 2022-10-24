@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: containerd-wasi-installer
+  namespace: kube-system
+  labels:
+    k8s-app: containerd-wasi-installer
+spec:
+  selector:
+    matchLabels:
+      k8s-app: containerd-wasi-installer
+  template:
+    metadata:
+      labels:
+        k8s-app: containerd-wasi-installer
+    spec:
+      containers:
+        - name: containerd-wasi-installer
+          image: cpuguy83/wasi-shim-installer:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: hostsystemd
+              mountPath: /run/systemd/private
+            - name: c8dconfig
+              mountPath: /etc/containerd
+            - name: installpath
+              mountPath: /bin
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: hostsystemd
+          hostPath:
+            path: /run/systemd/private
+        - name: c8dconfig
+          hostPath:
+            path: /etc/containerd
+        - name: installpath
+          hostPath:
+            path: /usr/local/bin
